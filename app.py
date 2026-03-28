@@ -108,12 +108,14 @@ def run_app():
         """)
 
     if image_file is not None:
-        # We need to save it to a temporary file to run the cv2 processing logic
+        # CRITICAL FORENSIC FIX: We must save the uploaded file LOSSLESSLY.
+        # If we save it as a .jpg, Pillow applies 75% quality compression and destroys the microscopic PRNU static!
+        # Saving as .png guarantees 1:1 pixel accuracy passes into the extraction pipeline.
         image = Image.open(image_file)
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp_file:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
             if image.mode in ("RGBA", "P"):
                 image = image.convert("RGB")
-            image.save(tmp_file.name)
+            image.save(tmp_file.name, format="PNG")
             temp_path = tmp_file.name
             
         st.markdown('<div class="glass-container">', unsafe_allow_html=True)
