@@ -1,0 +1,27 @@
+__pycache__/
+.pytest_cache/
+*.pyc
+*.pyo
+*.pyd
+
+# Datasets (Do not push heavy images to GitHub)
+dataset_raw/
+dataset/
+
+# Models (Do not push heavy weights to GitHub)
+models/*.pth
+models/*.pt
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDEs
+.vscode/
+.idea/
+.spyderproject
