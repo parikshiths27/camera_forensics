@@ -15,9 +15,10 @@ from src.predict import predict_camera
 
 st.set_page_config(page_title="Camera Model Identification", layout="wide")
 
-# Model paths
-MODEL_PATH = r"c:\Projects\camera_forensics\models\forensics_cnn.pth"
-CLASS_MAPPING_PATH = r"c:\Projects\camera_forensics\models\class_mapping.txt"
+# Model paths (OS-agnostic for Cloud Deployment)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "models", "forensics_cnn.pth")
+CLASS_MAPPING_PATH = os.path.join(BASE_DIR, "models", "class_mapping.txt")
 
 def run_app():
     st.markdown("""
