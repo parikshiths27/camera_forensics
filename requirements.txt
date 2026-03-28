@@ -1,9 +1,9 @@
-torch>=2.0.0
-torchvision>=0.15.0
-opencv-python>=4.8.0
-streamlit>=1.30.0
-numpy>=1.24.0
-matplotlib>=3.7.0
-
+torch
+torchvision
+numpy
+streamlit
 scikit-image
+pillow
+pillow-heif
+opencv-python-headless
 PyWavelets
