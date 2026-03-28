@@ -31,8 +31,12 @@ def split_dataset(raw_dir: str, output_dir: str, train_ratio: float = 0.8):
         (train_path / class_name).mkdir(parents=True, exist_ok=True)
         (test_path / class_name).mkdir(parents=True, exist_ok=True)
         
-        # Get all images
-        images = [f for f in class_dir.iterdir() if f.is_file() and f.suffix.lower() in ['.jpg', '.jpeg', '.png']]
+        # Collect images recursively (rglob) with robust case-insensitive suffix checking
+        valid_exts = {'.jpg', '.jpeg', '.png', '.heic'}
+        images = [
+            f for f in class_dir.rglob('*') 
+            if f.is_file() and f.suffix.lower() in valid_exts
+        ]
         random.shuffle(images)
         
         split_idx = int(len(images) * train_ratio)

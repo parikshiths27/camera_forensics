@@ -145,14 +145,22 @@ def run_app():
                 try:
                     pred_class, conf = predict_camera(temp_path, MODEL_PATH, CLASS_MAPPING_PATH)
                     
+                    # Determine styles based on if it's an Anomaly/Unknown
+                    is_unknown = pred_class.startswith("Unknown")
+                    box_gradient = "linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%)" if is_unknown else "linear-gradient(135deg, #4b6cb7 0%, #182848 100%)"
+                    pred_title = "Anomaly Detected" if is_unknown else "Predicted Camera"
+                    
                     st.markdown('<div class="glass-container">', unsafe_allow_html=True)
                     st.markdown("### 📊 AI Forensic Report")
+                    
+                    if is_unknown:
+                        st.warning("🚨 **WARNING: OPEN-SET RECOGNITION TRIGGERED**\nThe sensor noise logic isolated from this photo is completely foreign to the AI. This photo was taken by a camera model that is not in the system's database!")
                     
                     mc1, mc2 = st.columns(2)
                     with mc1:
                         st.markdown(f"""
-                        <div class="metric-box" style="background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);">
-                            <div class="metric-title">Predicted Camera</div>
+                        <div class="metric-box" style="background: {box_gradient};">
+                            <div class="metric-title">{pred_title}</div>
                             <div class="metric-value">{pred_class.replace('_', ' ').title()}</div>
                         </div>
                         """, unsafe_allow_html=True)
@@ -160,7 +168,7 @@ def run_app():
                     with mc2:
                         st.markdown(f"""
                         <div class="metric-box">
-                            <div class="metric-title">Fingerprint Confidence</div>
+                            <div class="metric-title">Network Confidence</div>
                             <div class="metric-value">{conf * 100:.1f}%</div>
                         </div>
                         """, unsafe_allow_html=True)
@@ -171,10 +179,75 @@ def run_app():
                     
         with st.expander("📖 Uncover the Science (How it works)"):
             st.markdown("""
-            1. **Scene Removal**: We mathematically denoise the image to separate the physical object (a tree, a face) from the high-frequency electronic noise.
-            2. **PRNU Extraction**: Subtracting the denoised image from the original isolates the sensor's unique pixel-level noise pattern (Photo Response Non-Uniformity).
-            3. **Deep Classification**: The AI looks at 16 tiny patches of this isolated static and uses deep convolutions (ResNet-18) to match the noise syntax to known hardware architectures.
-            """)
+            <style>
+            .pipeline-container {
+                border-left: 3px dashed #00f2fe;
+                margin-left: 20px;
+                padding-left: 25px;
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+                padding-bottom: 10px;
+                padding-top: 10px;
+            }
+            .pipeline-step {
+                background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 10px;
+                padding: 15px 20px;
+                position: relative;
+                color: #e0e0e0;
+                transition: transform 0.2s ease;
+            }
+            .pipeline-step:hover {
+                transform: translateX(5px);
+                background: rgba(255,255,255,0.15);
+            }
+            .pipeline-step::before {
+                content: '';
+                position: absolute;
+                left: -28px;
+                top: 50%;
+                width: 25px;
+                border-top: 3px dashed #00f2fe;
+            }
+            .pipeline-circle {
+                position: absolute;
+                left: -35px;
+                top: calc(50% - 6px);
+                width: 12px;
+                height: 12px;
+                background: #00f2fe;
+                border-radius: 50%;
+                box-shadow: 0 0 10px #00f2fe;
+            }
+            .step-title {
+                color: #00f2fe;
+                font-weight: 800;
+                font-size: 1.2rem;
+                margin-bottom: 5px;
+                letter-spacing: 0.5px;
+            }
+            </style>
+            
+            <div class="pipeline-container">
+                <div class="pipeline-step">
+                    <div class="pipeline-circle"></div>
+                    <div class="step-title">1. Scene Removal (Wavelet Filter)</div>
+                    <div>The system applies a mathematical <b>Daubechies Wavelet filter</b> to aggressively extract and destroy the physical scenery (faces, trees, buildings) from the image.</div>
+                </div>
+                <div class="pipeline-step">
+                    <div class="pipeline-circle"></div>
+                    <div class="step-title">2. PRNU Extraction</div>
+                    <div>By subtracting the filtered image from the original, we violently isolate the <b style="color:white;">Photo Response Non-Uniformity</b>—the microscopic, invisible silicon manufacturing dust unique to every camera sensor hardware.</div>
+                </div>
+                <div class="pipeline-step">
+                    <div class="pipeline-circle"></div>
+                    <div class="step-title">3. Deep Inference (ResNet-18)</div>
+                    <div>The AI slices the pure isolated sensor-noise into 16 independent tensor patches and feeds them through a <b>Deep PyTorch Neural Network</b> to match the geometric noise syntax against known hardware fingerprints using a Majority Voting algorithm.</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
             
         os.remove(temp_path) # cleanup
 

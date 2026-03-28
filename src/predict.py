@@ -30,20 +30,26 @@ def predict_camera(image_path, model_path, class_mapping_path):
         probabilities = torch.nn.functional.softmax(outputs, dim=1)
         _, preds = torch.max(outputs, 1)
         
-    preds = preds.cpu().numpy()
+    predictions = preds.cpu().numpy()
     probs = probabilities.cpu().numpy()
+    patch_confidences = [probs[i][predictions[i]] for i in range(len(predictions))]
     
-    # Majority voting over the 16 patches
-    counter = Counter(preds)
-    most_common_class_idx, count = counter.most_common(1)[0]
+    # Majority voting
+    vote_counts = Counter(predictions)
+    majority_class_idx, vote_freq = vote_counts.most_common(1)[0]
     
-    # Extracted final class prediction
-    predicted_class_name = class_mapping[most_common_class_idx]
+    # Calculate average confidence strictly for the patches that voted for the majority class
+    majority_confidences = [patch_confidences[i] for i, pred in enumerate(predictions) if pred == majority_class_idx]
+    avg_confidence = np.mean(majority_confidences) if majority_confidences else 0.0
     
-    # Calculate confidence: Average probability of the predicted class across patches that derived it
-    voting_indices = [i for i, p in enumerate(preds) if p == most_common_class_idx]
-    avg_confidence = np.mean([probs[i][most_common_class_idx] for i in voting_indices])
+    # === ANOMALY DETECTION (Open-Set Recognition) ===
+    # Adjusted threshold: With 7 classes, random guessing is ~14%.
+    # Therefore, 45% confidence is actually a statistically significant fingerprint match!
+    # We lower the confidence threshold to 0.40 (40%) for a 7-class model.
+    if vote_freq < 7 or avg_confidence < 0.40:
+        # We flag it as an Unknown Device
+        return "Unknown Device (Not in Database)", float(avg_confidence)
+
+    pred_class = class_mapping[majority_class_idx]
     
-    patch_predictions = {class_mapping[idx]: prob for idx, prob in zip(preds, probs)}
-    
-    return predicted_class_name, float(avg_confidence)
+    return pred_class, float(avg_confidence)

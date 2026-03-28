@@ -148,4 +148,4 @@ def train_model(data_dir=r"c:\Projects\camera_forensics\dataset", epochs=50, bat
             f.write(f"{idx},{cls}\n")
 
 if __name__ == "__main__":
-    train_model(epochs=50, batch_size=32)
+    train_model(epochs=100, batch_size=32)

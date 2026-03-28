@@ -1,3 +1,5 @@
-0,oneplus_nord2t
-1,oppo_f25
-2,samsung_m53
+0,Redmi_Note10_Pro
+1,Samsung_Galaxy_S20Plus
+2,iphone_16
+3,oneplus_nord2t
+4,oppo_f25

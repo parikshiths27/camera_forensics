@@ -1,5 +1,7 @@
 import cv2
 import numpy as np
+from pathlib import Path
+from PIL import Image
 
 def preprocess_image(image_path: str):
     """
@@ -10,8 +12,20 @@ def preprocess_image(image_path: str):
     
     Returns a normalized grayscale image (128, 128) as a numpy array.
     """
+    ext = Path(image_path).suffix.lower()
+    
     # Read image in grayscale
-    img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+    if ext == '.heic':
+        try:
+            import pillow_heif
+            pillow_heif.register_heif_opener()
+            img_pil = Image.open(image_path).convert('L')
+            img = np.array(img_pil)
+        except ImportError:
+            raise ImportError("pillow-heif is not installed. Run 'pip install pillow-heif' to process iPhone .heic images.")
+    else:
+        img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+        
     if img is None:
         raise FileNotFoundError(f"Could not read image from {image_path}")
         

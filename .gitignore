@@ -8,9 +8,7 @@ __pycache__/
 dataset_raw/
 dataset/
 
-# Models (Do not push heavy weights to GitHub)
-models/*.pth
-models/*.pt
+# Models (We will allow the 43MB PyTorch file to upload to Streamlit Cloud)
 
 # Environments
 .env
