@@ -43,11 +43,14 @@ def predict_camera(image_path, model_path, class_mapping_path):
     avg_confidence = np.mean(majority_confidences) if majority_confidences else 0.0
     
     # === ANOMALY DETECTION (Open-Set Recognition) ===
-    # Adjusted threshold: With 7 classes, random guessing is ~14%.
-    # Therefore, 45% confidence is actually a statistically significant fingerprint match!
-    # We lower the confidence threshold to 0.40 (40%) for a 7-class model.
-    if vote_freq < 7 or avg_confidence < 0.40:
-        # We flag it as an Unknown Device
+    # HACKATHON DEMO PARANOIA MODE:
+    # Because iOS browsers covertly apply harsh JPEG compression to live photo uploads,
+    # we are artificially cranking our security thresholds to the absolute maximum.
+    # If the hardware static does not reach a staggering 90% confidence score,
+    # OR if the "AI Jury" doesn't reach a near-unanimous 12 out of 16 agreement,
+    # the system will instantly reject the photo as a corrupted anomaly!
+    if vote_freq < 12 or avg_confidence < 0.90:
+        # We flag it as an Unknown Device / Corrupted Forensic Evidence
         return "Unknown Device (Not in Database)", float(avg_confidence)
 
     pred_class = class_mapping[majority_class_idx]
